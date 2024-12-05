@@ -79,27 +79,43 @@ class TicTacToe:
                 self.update_info()
 
     def best_move(self):
-        """Находит лучший ход для бота."""
-        # Проверка возможности выигрыша
+        """Находит лучший ход для бота, даже на пустой доске."""
+        if "" not in self.board: # проверка на заполненность
+            return None
+
+        # Выигрышный ход (первым)
         for i in range(9):
             if self.board[i] == "":
                 self.board[i] = self.bot_player
-                if self.check_winner():
-                    return i
-                self.board[i] = ""
-
-        # Блокировка хода игрока
-        for i in range(9):
-            if self.board[i] == "":
-                self.board[i] = "X"
                 if self.check_winner():
                     self.board[i] = ""
                     return i
                 self.board[i] = ""
 
-        # Случайный ход среди доступных
-        available_move = [i for i in range(9) if self.board[i] == ""]
-        return random.choice(available_move) if available_move else None
+        # Блокировка выигрыша игрока (первым)
+        if self.board[4] == "": #Центр доски - стратегически важный
+            return 4  # Захват центра на первом ходу
+
+        for i in range(9):
+            if self.board[i] == "":
+                self.board[i] = "X"  # Игрок ходит "X"
+                if self.check_winner():
+                    self.board[i] = ""
+                    return i
+                self.board[i] = ""
+
+        # Если ни выигрышного хода, ни блокировки нет, выбираем угол или край
+        corners = [0, 2, 6, 8]
+        edges = [1, 3, 5, 7]
+        available_corners = [c for c in corners if self.board[c] == ""]
+        available_edges = [e for e in edges if self.board[e] == ""]
+
+        if available_corners:
+            return random.choice(available_corners)
+        elif available_edges:
+            return random.choice(available_edges)
+        else: #Should never happen because we checked if board is full
+            return None
 
     def check_winner(self):
         """Проверяет наличие победителя."""
